@@ -44,9 +44,14 @@ filename = 'P0X_MeasBeskrivendeTekst_Y.mat';
 
 if online
     
-    % LEGO EV3 og styrestikke
+    % LEGO EV3 og styrestikke    
     mylego = legoev3('USB');
-    joystick = vrjoystick(1);
+    selected_joystick = 1;
+    if ~ismac && isunix
+        selected_joystick = 2;
+    end
+    disp(selected_joystick)
+    joystick = vrjoystick(selected_joystick);
     [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
 
     % sensorer
