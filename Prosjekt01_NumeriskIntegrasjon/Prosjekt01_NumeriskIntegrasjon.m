@@ -74,7 +74,7 @@ set(0,'defaultTextFontSize',16)
 
 % setter skyteknapp til 0, og tellevariabel k=1
 JoyMainSwitch=0;
-k=2;
+k=1;
 
 while ~JoyMainSwitch
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -129,22 +129,25 @@ while ~JoyMainSwitch
     nullflow = Lys(1); %nullpunkt for reflektert lys
     y(1) = 0; %volum
     Ts(1) = 0;
+    Flow(1) = Lys(1) - nullflow;
    
     % Regner ut datavektorene lys, tid, flow og volum
-    Ts(k) = Tid(k) - Tid(k-1);
-    Flow(k) = Lys(k) - nullflow;
-    y(k) = y(k-1) + Ts(k) * Flow(k-1);
+    if(k>=2)
+        Ts(k) = Tid(k) - Tid(k-1);
+        Flow(k) = Lys(k) - nullflow;
+        y(k) = y(k-1) + Ts(k) * Flow(k-1);
+    end
 
     % Andre beregninger som ikke avhenger av initialverdi
     
 
     % Pådragsberegninger
-    PowerA(k) = a*JoyForover(k);
+    %PowerA(k) = a*JoyForover(k);
 
     %if online
         % Setter powerdata mot EV3
-        motorA.Speed = PowerA(k);
-        start(motorA);
+        %motorA.Speed = PowerA(k);
+        %start(motorA);
     %end
     %--------------------------------------------------------------
 

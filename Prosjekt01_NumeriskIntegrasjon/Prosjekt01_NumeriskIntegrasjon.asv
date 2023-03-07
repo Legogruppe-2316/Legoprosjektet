@@ -63,18 +63,18 @@ disp('Equipment initialized.')
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                       SPECIFY FIGURE SIZE
-%fig1=figure;
-%screen = get(0,'Screensize');
-%set(fig1,'Position',[1,1,0.5*screen(3), 0.5*screen(4)])
-%set(0,'defaultTextInterpreter','latex');
-%set(0,'defaultAxesFontSize',14)
-%set(0,'defaultTextFontSize',16)
+fig1=figure;
+screen = get(0,'Screensize');
+set(fig1,'Position',[1,1,0.5*screen(3), 0.5*screen(4)])
+set(0,'defaultTextInterpreter','latex');
+set(0,'defaultAxesFontSize',14)
+set(0,'defaultTextFontSize',16)
 %----------------------------------------------------------------------
 
 
 % setter skyteknapp til 0, og tellevariabel k=1
 JoyMainSwitch=0;
-k=2;
+k=1;
 
 while ~JoyMainSwitch
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -126,7 +126,7 @@ while ~JoyMainSwitch
     a=0.7;
 
     % Tilordne målinger til variabler'
-    nullflow = Lys(1); %nullpunkt for reflektert lys
+    nullflow = 50; %nullpunkt for reflektert lys
     y(1) = 0; %volum
     Ts(1) = 0;
    
@@ -139,7 +139,7 @@ while ~JoyMainSwitch
     
 
     % Pådragsberegninger
-    %PowerA(k) = a*JoyForover(k);
+    PowerA(k) = a*JoyForover(k);
 
     %if online
         % Setter powerdata mot EV3
@@ -162,20 +162,20 @@ while ~JoyMainSwitch
     % hele datasettet (1:end) eksisterer i den lagrede .mat fila
 
     % aktiver fig1
-    %figure(fig1)
+    figure(fig1)
 
-    %subplot(2,2,1)
-    %plot(Tid(1:k),Flow(1:k));
-    %title('Flow(t)')
-    %xlabel('Tid [sek]')
+    subplot(2,2,1)
+    plot(Tid(1:k),Flow(1:k));
+    title('Flow(t)')
+    xlabel('Tid [sek]')
 
-    %subplot(2,2,2)
-    %plot(Tid(1:k),y(1:k));
-    %title('Volum(t)')
-    %xlabel('Tid [sek]')
+    subplot(2,2,2)
+    plot(Tid(1:k),y(1:k));
+    title('Volum(t)')
+    xlabel('Tid [sek]')
 
     % tegn nå (viktig kommando)
-    %drawnow
+    drawnow
     %--------------------------------------------------------------
 
     % For å flytte PLOT DATA etter while-lokken, er det enklest å
