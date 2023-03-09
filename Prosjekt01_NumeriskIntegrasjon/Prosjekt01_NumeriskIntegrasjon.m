@@ -21,9 +21,9 @@
 % Alltid lurt å rydde workspace opp først
 clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
-online = true;
+online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P0X_MeasBeskrivendeTekst_Y.mat';
+filename = 'P01_NumeriskIntegrasjon_sinus.mat';
 %--------------------------------------------------------------------------
 
 
@@ -60,6 +60,7 @@ if online
 else
     % Dersom online=false lastes datafil.
     load(filename)
+    online = false;
 end
 
 disp('Equipment initialized.')
@@ -90,6 +91,7 @@ while ~JoyMainSwitch
     % de sensorene og motoren som ikke brukes.
    
     if online
+        disp("Hei")
         if k==1
             tic
             Tid(1) = 0;
@@ -129,21 +131,18 @@ while ~JoyMainSwitch
 
     % Parametre
     a=0.7;
-
     % Tilordne målinger til variabler'
     nullflow = Lys(1); %nullpunkt for reflektert lys
     y(1) = 20; %volum
     Ts(1) = 0;
+    Offset = 5;
     Flow(1) = Lys(1) - nullflow;
    
     % Regner ut datavektorene lys, tid, flow og volum
     if(k>=2)
         Ts(k) = Tid(k) - Tid(k-1);
-        Flow(k) = nullflow - Lys(k);
+        Flow(k) = nullflow - Lys(k) - 13;
         y(k) = y(k-1) + Ts(k) * Flow(k-1);
-        if (y(k) < 0)
-            y(k) = 0;
-        end
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
