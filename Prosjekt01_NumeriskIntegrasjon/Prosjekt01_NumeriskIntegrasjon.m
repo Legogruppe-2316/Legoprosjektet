@@ -132,15 +132,18 @@ while ~JoyMainSwitch
 
     % Tilordne målinger til variabler'
     nullflow = Lys(1); %nullpunkt for reflektert lys
-    y(1) = 0; %volum
+    y(1) = 20; %volum
     Ts(1) = 0;
     Flow(1) = Lys(1) - nullflow;
    
     % Regner ut datavektorene lys, tid, flow og volum
     if(k>=2)
         Ts(k) = Tid(k) - Tid(k-1);
-        Flow(k) = Lys(k) - nullflow;
+        Flow(k) = nullflow - Lys(k);
         y(k) = y(k-1) + Ts(k) * Flow(k-1);
+        if (y(k) < 0)
+            y(k) = 0;
+        end
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
@@ -188,7 +191,8 @@ while ~JoyMainSwitch
 
     % For å flytte PLOT DATA etter while-lokken, er det enklest å
     % flytte de neste 5 linjene (til og med "end") over PLOT DATA.
-    % For å indentere etterpå, trykk Ctrl-A/Cmd-A og deretter Crtl-I/Cmd-I
+    % For å indentere etterpå, trykk Ctrl-A/Cmd-A og deretter
+    % Crtl-I/Cmd-Ixxx
     %
     % Oppdaterer tellevariabel
     k=k+1;
