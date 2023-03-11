@@ -81,6 +81,8 @@ set(0,'defaultTextFontSize',16)
 % setter skyteknapp til 0, og tellevariabel k=1
 JoyMainSwitch=0;
 k=1;
+shouldAddBias = false;
+
 
 while ~JoyMainSwitch
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -131,18 +133,32 @@ while ~JoyMainSwitch
 
     % Parametre
     a=0.7;
+    
     % Tilordne målinger til variabler'
+    Offset = -1.8;
     nullflow = Lys(1); %nullpunkt for reflektert lys
-    y(1) = 20; %volum
+    y(1) = 0; %volum
     Ts(1) = 0;
-    Offset = 5;
     Flow(1) = Lys(1) - nullflow;
    
     % Regner ut datavektorene lys, tid, flow og volum
+
     if(k>=2)
         Ts(k) = Tid(k) - Tid(k-1);
-        Flow(k) = nullflow - Lys(k) - 13;
+        Flow(k) = (nullflow - Lys(k));
         y(k) = y(k-1) + Ts(k) * Flow(k-1);
+
+
+        if Flow(k) > 0
+            shouldAddBias = true;
+        end
+
+        if shouldAddBias
+            Flow(k) = Flow(k) + Offset
+        end
+
+
+
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
@@ -194,7 +210,11 @@ while ~JoyMainSwitch
     % Crtl-I/Cmd-Ixxx
     %
     % Oppdaterer tellevariabel
+    if (k > 100)
+        break
+    end
     k=k+1;
+
 end
 
 
