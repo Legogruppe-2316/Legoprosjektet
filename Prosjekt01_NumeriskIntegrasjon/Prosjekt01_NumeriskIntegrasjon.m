@@ -21,7 +21,7 @@
 % Alltid lurt å rydde workspace opp først
 clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
-online = false;
+online = true;
 % Spesifiser et beskrivende filnavn for lagring av måledata
 filename = 'P01_NumeriskIntegrasjon_sinus.mat';
 %--------------------------------------------------------------------------
@@ -93,7 +93,6 @@ while ~JoyMainSwitch
     % de sensorene og motoren som ikke brukes.
    
     if online
-        disp("Hei")
         if k==1
             tic
             Tid(1) = 0;
@@ -135,7 +134,10 @@ while ~JoyMainSwitch
     a=0.7;
     
     % Tilordne målinger til variabler'
-    Offset = -1.8;
+    Offset = 0;
+    if ~online
+       Offset = -1.8;
+    end
     nullflow = Lys(1); %nullpunkt for reflektert lys
     y(1) = 0; %volum
     Ts(1) = 0;
@@ -154,7 +156,7 @@ while ~JoyMainSwitch
         end
 
         if shouldAddBias
-            Flow(k) = Flow(k) + Offset
+            Flow(k) = Flow(k) + Offset;
         end
 
 
@@ -210,7 +212,7 @@ while ~JoyMainSwitch
     % Crtl-I/Cmd-Ixxx
     %
     % Oppdaterer tellevariabel
-    if (k > 100)
+    if (k > 100 && ~online)
         break
     end
     k=k+1;

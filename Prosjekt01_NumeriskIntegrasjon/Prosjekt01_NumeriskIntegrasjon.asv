@@ -23,7 +23,7 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = true;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P0X_MeasBeskrivendeTekst_Y.mat';
+filename = 'P01_NumeriskIntegrasjon_sinus.mat';
 %--------------------------------------------------------------------------
 
 
@@ -44,9 +44,14 @@ filename = 'P0X_MeasBeskrivendeTekst_Y.mat';
 
 if online
     
-    % LEGO EV3 og styrestikke
+    % LEGO EV3 og styrestikke    
     mylego = legoev3('USB');
-    joystick = vrjoystick(1);
+    selected_joystick = 1;
+    if ~ismac && isunix
+        selected_joystick = 2;
+    end
+    disp(selected_joystick)
+    joystick = vrjoystick(selected_joystick);
     [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
 
     % sensorer
@@ -55,6 +60,7 @@ if online
 else
     % Dersom online=false lastes datafil.
     load(filename)
+    online = false;
 end
 
 disp('Equipment initialized.')
@@ -75,6 +81,8 @@ set(0,'defaultTextFontSize',16)
 % setter skyteknapp til 0, og tellevariabel k=1
 JoyMainSwitch=0;
 k=1;
+shouldAddBias = false;
+
 
 while ~JoyMainSwitch
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -85,6 +93,7 @@ while ~JoyMainSwitch
     % de sensorene og motoren som ikke brukes.
    
     if online
+        disp("Hei")
         if k==1
             tic
             Tid(1) = 0;
@@ -124,22 +133,39 @@ while ~JoyMainSwitch
 
     % Parametre
     a=0.7;
-
+    
     % Tilordne målinger til variabler'
-    nullflow = 50; %nullpunkt for reflektert lys
+    Offset = -1.8;
+    nullflow = Lys(1); %nullpunkt for reflektert lys
     y(1) = 0; %volum
     Ts(1) = 0;
+    Flow(1) = Lys(1) - nullflow;
    
     % Regner ut datavektorene lys, tid, flow og volum
-    Ts(k) = Tid(k) - Tid(k-1);
-    Flow(k) = Lys(k) - nullflow;
-    y(k) = y(k-1) + Ts(k) * Flow(k-1);
+
+    if(k>=2)
+        Ts(k) = Tid(k) - Tid(k-1);
+        Flow(k) = (nullflow - Lys(k));
+        y(k) = y(k-1) + Ts(k) * Flow(k-1);
+
+
+        if Flow(k) > 0
+            shouldAddBias = true;
+        end
+
+        if shouldAddBias
+            Flow(k) = Flow(k) + Offset
+        end
+
+
+
+    end
 
     % Andre beregninger som ikke avhenger av initialverdi
     
 
     % Pådragsberegninger
-    PowerA(k) = a*JoyForover(k);
+    %PowerA(k) = a*JoyForover(k);
 
     %if online
         % Setter powerdata mot EV3
@@ -180,10 +206,15 @@ while ~JoyMainSwitch
 
     % For å flytte PLOT DATA etter while-lokken, er det enklest å
     % flytte de neste 5 linjene (til og med "end") over PLOT DATA.
-    % For å indentere etterpå, trykk Ctrl-A/Cmd-A og deretter Crtl-I/Cmd-I
+    % For å indentere etterpå, trykk Ctrl-A/Cmd-A og deretter
+    % Crtl-I/Cmd-Ixxx
     %
     % Oppdaterer tellevariabel
+    if (k > 100 && ~)
+        break
+    end
     k=k+1;
+
 end
 
 
