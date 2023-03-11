@@ -114,7 +114,7 @@ while ~JoyMainSwitch
     if(k>=2)
         Ts(k) = Tid(k) - Tid(k-1);
         Flow(k) = (nullflow - Lys(k));
-        y(k) = y(k-1) + Ts(k) * Flow(k-1);
+        y(k) = EulerForward(y(k-1), Flow(k-1),Ts(k));
 
         if Flow(k) > 0
             shouldAddBias = true;
