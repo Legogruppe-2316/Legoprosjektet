@@ -107,7 +107,7 @@ while ~JoyMainSwitch
             M = k;
         end
 
-        Temp_FIR(k) = (1/M) * sum(Temp(k+1-M:k));
+        Temp_FIR(k) = (1/M) * sum(Temp())
     end
     %--------------------------------------------------------------
 
