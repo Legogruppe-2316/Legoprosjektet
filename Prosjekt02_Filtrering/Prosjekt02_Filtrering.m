@@ -13,7 +13,7 @@
 %                EXPERIMENT SETUP AND DATA FILENAME
 clear; close all
 online = true;
-filename = 'P02_Filtrering.mat';
+filename = 'PO2_FiltreringData.mat';
 %--------------------------------------------------------------------------
 
 
@@ -33,6 +33,7 @@ if online
 else
     % Dersom online=false lastes datafil.
     load(filename)
+    online = false;
 end
 
 disp('Equipment initialized.')
@@ -92,22 +93,24 @@ while ~JoyMainSwitch
 
     % La Temp(k) tilsvare Lys(k)
     Temp(k) = Lys(k);
+    % Testverdier for M og alpha
+    a = 0.2;
     
     if k==1
-        % Initialverdier
+    % Initialverdier
         Ts(1) = 0.01;
         Temp_FIR(1) = Temp(1);
-        Temp_IIR(1) = 2;
-    % Testverdier for M og alpha
-        M = 500;
-        a = 0.5;
-
+        Temp_IIR(1) = Temp(1);
     else
+    % Få tak i forrige verdi
+        M =100;
         if(k < M)
             M = k;
+            Temp_FIR(k) = (1/M) * sum(Temp(k+1-M:k));
         end
-
+    % Regn ut gjennomsnittlig verdi fra forrige 
         Temp_FIR(k) = (1/M) * sum(Temp(k+1-M:k));
+        Temp_IIR(k) = (1-a)* Temp_IIR(k-1) + a * Temp(k);
     end
     %--------------------------------------------------------------
 
@@ -117,26 +120,16 @@ while ~JoyMainSwitch
     % aktiver fig1
     figure(fig1)
 
-    subplot(2,2,1)
-    plot(Tid(1:k),Lys(1:k));
-    title('Lys reflektert')
-    xlabel('Tid [sek]')
+    title('Simulert temperatur');
+    xlabel('Tid [sek]');
 
-    subplot(2,2,2)
-    plot(Tid(1:k),Avstand(1:k));
-    title('Avstand')
-    xlabel('Tid [sek]')
+    subplot(2,1,1)
+    plot(Tid(1:k),Temp(1:k), 'r');
+    hold on;
+    plot(Tid(1:k),Temp_FIR(1:k), 'b');
+    plot(Tid(1:k), Temp_IIR(1:k), 'g');
 
-    subplot(2,2,3)
-    plot(Tid(1:k),VinkelPosMotorB(1:k));
-    title('Vinkelposisjon motor B')
-    xlabel('Tid [sek]')
-
-    subplot(2,2,4)
-    plot(Tid(1:k),PowerB(1:k));
-    title('Power B')
-    xlabel('Tid [sek]')
-
+   legend('Temp(k)', 'Temp_FIR(k)', 'Temp_IIR(k)')
     % tegn nå (viktig kommando)
     drawnow
     %--------------------------------------------------------------
