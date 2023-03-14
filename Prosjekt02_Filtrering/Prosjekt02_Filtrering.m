@@ -1,45 +1,38 @@
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% Prosjekt01_NumeriskIntegrasjon
+% Prosjekt0X_.....
 %
-% Hensikten med programmet er å numerisk integrere lyssignalet
+% Hensikten med programmet er å ....
 % Følgende sensorer brukes:
 % - Lyssensor
+% - ...
+% - ...
 %--------------------------------------------------------------------------
 
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                EXPERIMENT SETUP AND DATA FILENAME
-%
-% Alltid lurt å rydde workspace opp først
 clear; close all
-% Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = true;
-% Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P01_NumeriskIntegrasjon_sinus.mat';
+filename = 'P02_Filtrering.mat';
 %--------------------------------------------------------------------------
 
 
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                      INITIALIZE EQUIPMENT
+
 if online
     
-    % LEGO EV3 og styrestikke    
+    % LEGO EV3 og styrestikke
     mylego = legoev3('USB');
-    selected_joystick = 1;
-    if ~ismac && isunix
-        selected_joystick = 2;
-    end
-
-    disp(selected_joystick)
-    joystick = vrjoystick(selected_joystick);
+    joystick = vrjoystick(1);
     [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
 
     % sensorer
     myColorSensor = colorSensor(mylego);
+    
 else
     % Dersom online=false lastes datafil.
     load(filename)
-    online = false;
 end
 
 disp('Equipment initialized.')
@@ -56,33 +49,33 @@ set(0,'defaultAxesFontSize',14)
 set(0,'defaultTextFontSize',16)
 %----------------------------------------------------------------------
 
-% intialisering av variabler
+
+% setter skyteknapp til 0, og tellevariabel k=1
 JoyMainSwitch=0;
 k=1;
-shouldAddBias = false;
-
 
 while ~JoyMainSwitch
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                       GET TIME AND MEASUREMENT
-   
     if online
         if k==1
             tic
             Tid(1) = 0;
-            Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
         else
-            % Leser reflektert lys, og gjør det om til en double datatype
             Tid(k) = toc;
-            Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
         end
 
+        % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
+        Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+
+       
+        % Bruk filen joytest.m til å finne koden for de andre 
+        % knappene og aksene.
         [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
         JoyMainSwitch = JoyButtons(1);
         JoyForover(k) = JoyAxes(2);
 
     else
-        %avslutter programmer med joystick
         if k==numel(Tid)
             JoyMainSwitch=1;
         end
@@ -93,41 +86,27 @@ while ~JoyMainSwitch
     end
     %--------------------------------------------------------------
 
+
+
+
     % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %             CONDITIONS, CALCULATIONS AND SET MOTOR POWER
 
     % Parametre
     a=0.7;
-    
-    % Tilordne målinger til variabler'
-   
-    Offset = 0;
-    if ~online
-       Offset = -1.8;
-    end
 
-    if (k==1)
-        nullflow = Lys(1); %nullpunkt for reflektert lys
-        y(1) = 0; %volum
-        Ts(1) = 0;
-        Flow(1) = Lys(1) - nullflow;
-   
-    % Regner ut datavektorene lys, tid, flow og volum
+    % Tilordne målinger til variabler
 
+
+    if k==1
+        % Initialverdier
+        Ts(1) = 0.01; 
     else
-        Ts(k) = Tid(k) - Tid(k-1);
-        Flow(k) = (nullflow - Lys(k));
-        y(k) = EulerForward(y(k-1), Flow(k-1),Ts(k));
-
-        if Flow(k) > 0
-            shouldAddBias = true;
-        end
-
-        if shouldAddBias
-            Flow(k) = Flow(k) + Offset;
-        end
-    end   
+    end
     %--------------------------------------------------------------
+
+
+
 
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                  PLOT DATA
@@ -136,13 +115,23 @@ while ~JoyMainSwitch
     figure(fig1)
 
     subplot(2,2,1)
-    plot(Tid(1:k),Flow(1:k));
-    title('Flow(t)')
+    plot(Tid(1:k),Lys(1:k));
+    title('Lys reflektert')
     xlabel('Tid [sek]')
 
     subplot(2,2,2)
-    plot(Tid(1:k),y(1:k));
-    title('Volum(t)')
+    plot(Tid(1:k),Avstand(1:k));
+    title('Avstand')
+    xlabel('Tid [sek]')
+
+    subplot(2,2,3)
+    plot(Tid(1:k),VinkelPosMotorB(1:k));
+    title('Vinkelposisjon motor B')
+    xlabel('Tid [sek]')
+
+    subplot(2,2,4)
+    plot(Tid(1:k),PowerB(1:k));
+    title('Power B')
     xlabel('Tid [sek]')
 
     % tegn nå (viktig kommando)
@@ -150,12 +139,9 @@ while ~JoyMainSwitch
     %--------------------------------------------------------------
 
     % Oppdaterer tellevariabel
-    if (k > 100 && ~online)
-        break
-    end
     k=k+1;
-
 end
+
 
 
 
