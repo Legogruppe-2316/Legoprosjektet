@@ -94,7 +94,7 @@ while ~JoyMainSwitch
     % La Temp(k) tilsvare Lys(k)
     Temp(k) = Lys(k);
     % Testverdier for M og alpha
-    a = 0.2;
+    a = 0.6;
     
     if k==1
     % Initialverdier
@@ -103,14 +103,16 @@ while ~JoyMainSwitch
         Temp_IIR(1) = Temp(1);
     else
     % Få tak i forrige verdi
-        M =100;
+        M =3;
         if(k < M)
             M = k;
             Temp_FIR(k) = (1/M) * sum(Temp(k+1-M:k));
+            pause(1);
         end
     % Regn ut gjennomsnittlig verdi fra forrige 
         Temp_FIR(k) = (1/M) * sum(Temp(k+1-M:k));
         Temp_IIR(k) = (1-a)* Temp_IIR(k-1) + a * Temp(k);
+        pause(1);
     end
     %--------------------------------------------------------------
 
