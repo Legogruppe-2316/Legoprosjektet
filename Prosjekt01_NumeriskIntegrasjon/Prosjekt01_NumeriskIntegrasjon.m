@@ -100,18 +100,21 @@ while ~JoyMainSwitch
     a=0.7;
     
     % Tilordne målinger til variabler'
+   
     Offset = 0;
     if ~online
        Offset = -1.8;
     end
-    nullflow = Lys(1); %nullpunkt for reflektert lys
-    y(1) = 0; %volum
-    Ts(1) = 0;
-    Flow(1) = Lys(1) - nullflow;
+
+    if (k==1)
+        nullflow = Lys(1); %nullpunkt for reflektert lys
+        y(1) = 0; %volum
+        Ts(1) = 0;
+        Flow(1) = Lys(1) - nullflow;
    
     % Regner ut datavektorene lys, tid, flow og volum
 
-    if(k>=2)
+    else
         Ts(k) = Tid(k) - Tid(k-1);
         Flow(k) = (nullflow - Lys(k));
         y(k) = EulerForward(y(k-1), Flow(k-1),Ts(k));
