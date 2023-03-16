@@ -66,10 +66,6 @@ while ~JoyMainSwitch
         else
             Tid(k) = toc;
             Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
-
-            if any(Tid >= 5)
-                break;
-            end
         end
        
         % Bruk filen joytest.m til å finne koden for de andre 
@@ -133,10 +129,19 @@ while ~JoyMainSwitch
     plot(Tid(1:k),Temp_FIR(1:k), 'b');
     plot(Tid(1:k), Temp_IIR(1:k), 'g');
 
-    legend('Temp(k)', 'Temp_FIR(k)', 'Temp_IIR(k)')
+   legend('Temp(k)', 'Temp_FIR(k)', 'Temp_IIR(k)')
     % tegn nå (viktig kommando)
     drawnow
     %--------------------------------------------------------------
+
+    pause(0.5);
+
+    for k=1
+        if(Tid(k) == 5)
+            end
+    end
+   
+
     % Oppdaterer tellevariabel
     k=k+1;
 end
