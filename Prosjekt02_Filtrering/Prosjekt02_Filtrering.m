@@ -13,7 +13,7 @@
 %                EXPERIMENT SETUP AND DATA FILENAME
 clear; close all
 online = true;
-filename = 'PO2_FiltreringData.mat';
+filename = '752del1.mat';
 %--------------------------------------------------------------------------
 
 
@@ -66,8 +66,12 @@ while ~JoyMainSwitch
         else
             Tid(k) = toc;
             Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+
+            %if any(Tid >= 5.5)
+             %   break;
+            %end
         end
-       
+       %pause(0.5);
         % Bruk filen joytest.m til å finne koden for de andre 
         % knappene og aksene.
         [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
@@ -80,7 +84,7 @@ while ~JoyMainSwitch
         end
 
         % simulerer EV3-Matlab kommunikasjon i online=false
-        pause(0.01)
+        %pause(0.01)
 
     end
     %--------------------------------------------------------------
@@ -92,9 +96,9 @@ while ~JoyMainSwitch
     %             CONDITIONS, CALCULATIONS AND SET MOTOR POWER
 
     % La Temp(k) tilsvare Lys(k)
-    Temp(k) = Lys(k);
+    Temp(k) = Lys(k) + randn;
     % Testverdier for M og alpha
-    a = 0.2;
+    a = 0.3;
     
     if k==1
     % Initialverdier
@@ -103,7 +107,7 @@ while ~JoyMainSwitch
         Temp_IIR(1) = Temp(1);
     else
     % Få tak i forrige verdi
-        M =100;
+        M = 50;
         if(k < M)
             M = k;
             Temp_FIR(k) = (1/M) * sum(Temp(k+1-M:k));
@@ -129,11 +133,10 @@ while ~JoyMainSwitch
     plot(Tid(1:k),Temp_FIR(1:k), 'b');
     plot(Tid(1:k), Temp_IIR(1:k), 'g');
 
-   legend('Temp(k)', 'Temp_FIR(k)', 'Temp_IIR(k)')
+    legend('Temp(k)', 'Temp_FIR(k)', 'Temp_IIR(k)')
     % tegn nå (viktig kommando)
     drawnow
     %--------------------------------------------------------------
-
     % Oppdaterer tellevariabel
     k=k+1;
 end
