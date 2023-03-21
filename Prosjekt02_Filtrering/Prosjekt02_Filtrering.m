@@ -110,11 +110,11 @@ while ~JoyMainSwitch
         M =3;
         if(k < M)
             M = k;
-            Temp_FIR(k) = (1/M) * sum(Temp(k+1-M:k));
+            Temp_FIR(k) = FIR_filter(Temp(k+1-M:k), M);
         end
     % Regn ut gjennomsnittlig verdi fra forrige 
-        Temp_FIR(k) = (1/M) * sum(Temp(k+1-M:k));
-        Temp_IIR(k) = (1-a)* Temp_IIR(k-1) + a * Temp(k);
+        Temp_FIR(k) = FIR_filter(Temp(k+1-M:k), M);
+        Temp_IIR(k) = IIR_filter(Temp_IIR(k-1), Temp(k), a);
     end
     %--------------------------------------------------------------
 
