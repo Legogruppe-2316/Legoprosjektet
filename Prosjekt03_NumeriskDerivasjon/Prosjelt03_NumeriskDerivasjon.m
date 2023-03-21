@@ -63,7 +63,7 @@ k=1;
 
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                        INITAL VALUES 
-alfaIIR = 0.05;
+alfaIIR = 0.03;
 intialSpeed = 1;
 intialIIRSpeed = 0;
 nominalTimeStep = 0;
@@ -109,11 +109,13 @@ while ~JoyMainSwitch
         Ts(1) = nominalTimeStep;
         Speed(1) = intialSpeed;
         SpeedIIR(1) = intialIIRSpeed;
+        AvstandIIR(1) = Avstand(1);
 
     else
         Ts(k) = Tid(k) - Tid(k-1);
         Speed(k) = Derivation(Avstand(k-1), Avstand(k), Ts(k));
-        SpeedIIR(k)= IIR_filter(SpeedIIR(k-1),Speed(k), alfaIIR);
+        AvstandIIR(k) = IIR_filter(AvstandIIR(k-1),Avstand(k), alfaIIR);
+        SpeedIIR(k) = Derivation(AvstandIIR(k-1), AvstandIIR(k), Ts(k));
     end
     %--------------------------------------------------------------
 
@@ -137,6 +139,11 @@ while ~JoyMainSwitch
     subplot(2,2,3)
     plot(Tid(1:k), SpeedIIR(1:k), 'g');
     title('FartIIR(t)')
+    xlabel('Tid [sek]')
+
+    subplot(2,2,4)
+    plot(Tid(1:k), AvstandIIR(1:k));
+    title('AvstandIIR(t)')
     xlabel('Tid [sek]')
 
 
