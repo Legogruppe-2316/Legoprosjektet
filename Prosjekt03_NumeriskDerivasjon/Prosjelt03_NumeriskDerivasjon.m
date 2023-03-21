@@ -126,25 +126,27 @@ while ~JoyMainSwitch
     figure(fig1)
 
 
-    subplot(2,2,1)
-    plot(Tid(1:k),Avstand(1:k));
-    title('Avstand(t)')
+    subplot(3,1, 1)
+    plot(Tid(1:k),Avstand(1:k), 'b');
+    title('Avstandsmåling rådata(b)og IIR-filtrert avstandsmåling, alfa=0.03 (r) ')
+    hold on;
+    plot(Tid(1:k),AvstandIIR(1:k), 'r');
     xlabel('Tid [sek]')
 
-    subplot(2,2,2)
+    subplot(3,1, 2)
     plot(Tid(1:k),Speed(1:k), 'r');
-    title('Fart(t)')
+    title('Fart(t) Rådata')
     xlabel('Tid [sek]')
 
-    subplot(2,2,3)
+    subplot(3,1,3)
     plot(Tid(1:k), SpeedIIR(1:k), 'g');
     title('FartIIR(t)')
     xlabel('Tid [sek]')
 
-    subplot(2,2,4)
-    plot(Tid(1:k), AvstandIIR(1:k));
-    title('AvstandIIR(t)')
-    xlabel('Tid [sek]')
+    %subplot(2,2,4)
+    %plot(Tid(1:k), AvstandIIR(1:k));
+    %title('AvstandIIR(t)')
+    %xlabel('Tid [sek]')
 
 
     % tegn nå (viktig kommando)
