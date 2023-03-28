@@ -12,8 +12,8 @@
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                EXPERIMENT SETUP AND DATA FILENAME
 clear; close all
-online = true;
-filename = 'PO2_FiltreringData.mat';
+online = false;
+filename = '822_2_rask_sinus.mat';
 %--------------------------------------------------------------------------
 
 
@@ -128,8 +128,8 @@ while ~JoyMainSwitch
 
     subplot(2,1, 1)
     plot(Tid(1:k),Avstand(1:k), 'b');
-    title('IIR-filter av Avstand(t)')
-    %hold on;
+    title('Avstand(t) og filtrert avstand')
+    hold on;
     plot(Tid(1:k),AvstandIIR(1:k), 'r');
     xlabel('Tid [sek]')
 

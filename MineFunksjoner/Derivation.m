@@ -1,6 +1,6 @@
 function [derivative] = Derivation(prevValue, currentValue, timeStep)
-%DERIVATION Summary of this function goes here
-%   Detailed explanation goes here
+% Funskjonen tar in tre integre prevValue, currentValue og timeStep og
+% generer den derivertet ved bruk av numerisk derivasjon
 derivative = (currentValue - prevValue)/timeStep;
 end
 
