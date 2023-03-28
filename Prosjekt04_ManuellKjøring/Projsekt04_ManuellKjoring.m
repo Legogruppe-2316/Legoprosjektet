@@ -33,7 +33,7 @@ if online
     [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
 
     % sensorer
-    % myColorSensor = colorSensororSensor(mylego);
+    myColorSensor = colorSensor(mylego, 1);
     myFirstMotor = motor(mylego,'A');
     mySecondMotor = motor(mylego, 'D');
 else
@@ -68,6 +68,7 @@ alfaIIR = 0.03;
 intialSpeed = 1;
 intialIIRSpeed = 0;
 nominalTimeStep = 0;
+referanseVerdi = 0;
 
 while ~JoyMainSwitch
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -76,10 +77,13 @@ while ~JoyMainSwitch
         if k==1
             tic
             Tid(1) = 0;
-            %Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
+            Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
+            referanseVerdi = Lys(1);
+            e(1) = referanseVerdi - Lys(1);
         else
             Tid(k) = toc;
-            %Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+            Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+            e(k) = referanseVerdi - Lys(k);
         end
        
         % Bruk filen joytest.m til å finne koden for de andre 
@@ -117,14 +121,16 @@ while ~JoyMainSwitch
     myFirstMotor.Speed = max(min(myFirstMotor.Speed, 100), -100);
     mySecondMotor.Speed = max(min(mySecondMotor.Speed, 100), -100);
 
-
+    if (Lys(k) >= 70)
+        break;
+    end
 
 
     if k==1
         Ts(1) = nominalTimeStep;
 
     else
-        Ts(k) = Tid(k) - Tid(k-1);;
+        Ts(k) = Tid(k) - Tid(k-1);
     end
     %--------------------------------------------------------------
 
@@ -135,10 +141,20 @@ while ~JoyMainSwitch
     figure(fig1)
 
 
-    subplot(1,1, 1)
+    subplot(1,3, 1)
     plot(Tid(1:k),JoyTwist(1:k), 'b');
     title('Joy Forover(t)')
     xlabel('Tid [sek]')
+
+    subplot(1,3,2);
+    plot(Tid(1:k),Lys(1:k),'r');
+    title('Verdier for Lys(k)');
+    xlabel('Tid(s)');
+
+    subplot(1,3,3);
+    plot(Tid(1:k),e(1:k),'g');
+    title('Verdier for e(k)');
+    xlabel('Tid(s)');
 
 
     % tegn nå (viktig kommando)

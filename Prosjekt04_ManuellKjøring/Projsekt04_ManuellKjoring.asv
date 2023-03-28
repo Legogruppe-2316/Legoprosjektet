@@ -33,7 +33,7 @@ if online
     [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
 
     % sensorer
-    % myColorSensor = colorSensororSensor(mylego);
+    myColorSensor = colorSensor(mylego, );
     myFirstMotor = motor(mylego,'A');
     mySecondMotor = motor(mylego, 'D');
 else
@@ -76,10 +76,11 @@ while ~JoyMainSwitch
         if k==1
             tic
             Tid(1) = 0;
-            %Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
+            Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
         else
             Tid(k) = toc;
-            %Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+            Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+            disp(Lys(k));
         end
        
         % Bruk filen joytest.m til å finne koden for de andre 
@@ -107,11 +108,12 @@ while ~JoyMainSwitch
 
     % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %             CONDITIONS, CALCULATIONS AND SET MOTOR POWER
-    twistSpeed = abs(JoyTwist(k));
+    twistSpeed = JoyTwist(k);
     forwardSpeed = JoyForover(k);
 
-    myFirstMotor.Speed = forwardSpeed + max(0, twistSpeed);
-    mySecondMotor.Speed = forwardSpeed + max(0, -twistSpeed);
+    
+    myFirstMotor.Speed = forwardSpeed + twistSpeed;
+    mySecondMotor.Speed = forwardSpeed -twistSpeed;
 
     myFirstMotor.Speed = max(min(myFirstMotor.Speed, 100), -100);
     mySecondMotor.Speed = max(min(mySecondMotor.Speed, 100), -100);
@@ -123,7 +125,7 @@ while ~JoyMainSwitch
         Ts(1) = nominalTimeStep;
 
     else
-        Ts(k) = Tid(k) - Tid(k-1);;
+        Ts(k) = Tid(k) - Tid(k-1);
     end
     %--------------------------------------------------------------
 
@@ -135,7 +137,7 @@ while ~JoyMainSwitch
 
 
     subplot(1,1, 1)
-    plot(Tid(1:k),JoyForover(1:k), 'b');
+    plot(Tid(1:k),JoyTwist(1:k), 'b');
     title('Joy Forover(t)')
     xlabel('Tid [sek]')
 
