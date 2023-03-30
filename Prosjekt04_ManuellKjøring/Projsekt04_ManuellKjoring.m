@@ -111,6 +111,11 @@ while ~JoyMainSwitch
 
     % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %             CONDITIONS, CALCULATIONS AND SET MOTOR POWER
+
+    if (Lys(k) >= 60)
+        break;
+    end
+    
     powerScale = (JoyPowerScale(k) + 100) / 200;
     twistSpeed = powerScale*JoyTwist(k);
     forwardSpeed = powerScale*JoyForover(k);
@@ -120,15 +125,13 @@ while ~JoyMainSwitch
     kraftA = forwardSpeed + twistSpeed;
     kraftD = forwardSpeed -twistSpeed;
 
-    myFirstMotor.Speed = max(min(kraftA, 100), -100);
-    mySecondMotor.Speed = max(min(kraftD, 100), -100);
+    powerA(k) = max(min(kraftA, 100), -100);
+    powerD(k) = max(min(kraftD, 100), -100);
 
-    powerA(k)= myFirstMotor.Speed;
-    powerD(k)= mySecondMotor.Speed;
+    myFirstMotor.Speed= powerA(k);
+    mySecondMotor.Speed= powerD(k);
 
-    if (Lys(k) >= 60)
-        %break;
-    end
+   
 
 
 
@@ -139,11 +142,14 @@ while ~JoyMainSwitch
         IAE(1) = 0;
         TV_a(1) = 0;
         TV_b(1) = 0;
+        MAE(1) = 0;
     else
         Ts(k) = Tid(k) - Tid(k-1);
 
         e(k) = referanseVerdi - Lys(k);
         IAE(k) = EulerForward(IAE(k-1), abs(e(k-1)), Ts(k));
+        
+        MAE(k) =   MAE(k-1) + (1/k) * abs(e(k));
 
         TV_a(k) = TV_a(k-1) + abs(powerA(k) - powerA(k - 1));
         TV_b(k) = TV_b(k-1) + abs(powerD(k)- powerD(k -1));
@@ -189,10 +195,11 @@ while ~JoyMainSwitch
     title('Avvik e(k)');
 
     subplot(3,2,3);
-    title('PowerA(k), blaa og PowerD(k), roed');
+    title('PowerA(k) og PowerD(k) ');
     plot(Tid(1:k), powerA(1:k), 'b');
     hold on;
     plot(Tid(1:k), powerD(1:k), 'r');
+    legend('PowerA', 'PowerD')
 
     subplot(3,2,4);
     plot(Tid(1:k), IAE(1:k));   
@@ -202,10 +209,16 @@ while ~JoyMainSwitch
     plot(Tid(1:k), TV_a(1:k), 'r');
     hold on;
     plot(Tid(1:k), TV_b(1:k), 'b');
-
-    title('TV_A(k), roed, TV_B(k), blaa')
-
+    title('TVa(k) og TVb(k)');
+    legend('TVa', 'TVb');
     
+
+    subplot(3,2,6);
+    plot(Tid(1:k), MAE(1:k),'m');
+    title('MAE(k)');
+
+
+   
     
 
     % tegn nå (viktig kommando)
