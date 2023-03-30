@@ -176,8 +176,10 @@ while ~JoyMainSwitch
     title('Avvik e(k)');
 
     subplot(3,2,3);
-    plot(Tid(k), powerA(1:k), 'b');
     title('PowerA(k) og PowerD(k)');
+    plot(Tid(1:k), powerA(1:k), 'b');
+    hold on;
+    plot(Tid(1:k), powerD(1:k), 'r');
    
     
     
