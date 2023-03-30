@@ -93,6 +93,7 @@ while ~JoyMainSwitch
         JoyMainSwitch = JoyButtons(1);
         JoyForover(k) = JoyAxes(2);
         JoyTwist(k) = JoyAxes(3);
+        JoyPowerScale(k) = JoyAxes(4);
         start(myFirstMotor)
         start(mySecondMotor)
 
@@ -112,6 +113,7 @@ while ~JoyMainSwitch
 
     % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %             CONDITIONS, CALCULATIONS AND SET MOTOR POWER
+    powerScale = (JoyPowerScale(k) + 100) / 200;
     twistSpeed = powerScale*JoyTwist(k);
     forwardSpeed = powerScale*JoyForover(k);
 
