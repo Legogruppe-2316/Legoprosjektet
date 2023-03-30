@@ -65,7 +65,7 @@ k=1;
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                        INITAL VALUES 
 alfaIIR = 0.03;
-intialSpeed = 1;
+powerScale = 0.2;
 intialIIRSpeed = 0;
 nominalTimeStep = 0;
 referanseVerdi = 0;
@@ -80,6 +80,7 @@ while ~JoyMainSwitch
             Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
             referanseVerdi = Lys(1);
             e(1) = referanseVerdi - Lys(1);
+            
         else
             Tid(k) = toc;
             Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
@@ -111,19 +112,24 @@ while ~JoyMainSwitch
 
     % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %             CONDITIONS, CALCULATIONS AND SET MOTOR POWER
-    twistSpeed = JoyTwist(k);
-    forwardSpeed = JoyForover(k);
+    twistSpeed = powerScale*JoyTwist(k);
+    forwardSpeed = powerScale*JoyForover(k);
+
 
     
-    myFirstMotor.Speed = forwardSpeed + twistSpeed;
-    mySecondMotor.Speed = forwardSpeed -twistSpeed;
+    kraftA = forwardSpeed + twistSpeed;
+    kraftD = forwardSpeed -twistSpeed;
 
-    myFirstMotor.Speed = max(min(myFirstMotor.Speed, 100), -100);
-    mySecondMotor.Speed = max(min(mySecondMotor.Speed, 100), -100);
+    myFirstMotor.Speed = max(min(kraftA, 100), -100);
+    mySecondMotor.Speed = max(min(kraftD, 100), -100);
 
-    if (Lys(k) >= 70)
-        break;
+    powerA(k)= myFirstMotor.Speed;
+    powerD(k)= mySecondMotor.Speed;
+
+    if (Lys(k) >= 60)
+        %break;
     end
+
 
 
     if k==1
@@ -141,21 +147,40 @@ while ~JoyMainSwitch
     figure(fig1)
 
 
-    subplot(1,3, 1)
-    plot(Tid(1:k),JoyTwist(1:k), 'b');
-    title('Joy Forover(t)')
-    xlabel('Tid [sek]')
+    %subplot(1,3, 1)
+    %plot(Tid(1:k),JoyTwist(1:k), 'b');
+    %title('Joy Forover(t)')
+    %xlabel('Tid [sek]')
 
-    subplot(1,3,2);
-    plot(Tid(1:k),Lys(1:k),'r');
-    title('Verdier for Lys(k)');
-    xlabel('Tid(s)');
+    %subplot(1,3,2);
+    %plot(Tid(1:k),Lys(1:k),'r');
+    %title('Verdier for Lys(k)');
+    %xlabel('Tid(s)');
 
-    subplot(1,3,3);
-    plot(Tid(1:k),e(1:k),'g');
-    title('Verdier for e(k)');
-    xlabel('Tid(s)');
+    %subplot(1,3,3);
+    %plot(Tid(1:k),e(1:k),'g');
+    %title('Verdier for e(k)');
+    %xlabel('Tid(s)');
 
+    %gjør referanseverdi til en vektor
+    referansevektor = repmat(referanseVerdi,1,length(Lys));
+    subplot(3,2,1);
+    plot(Tid(1:k),Lys(1:k), 'r');
+    title('Referanse og Lys(k)');
+    hold on;
+    plot(Tid(1:k),referansevektor, 'b');
+
+    
+    subplot(3,2,2);
+    plot(Tid(1:k), e(1:k),'g');
+    title('Avvik e(k)');
+
+    subplot(3,2,3);
+    plot(Tid(k), powerA(1:k), 'b');
+    title('PowerA(k) og PowerD(k)');
+   
+    
+    
 
     % tegn nå (viktig kommando)
     drawnow
@@ -164,6 +189,7 @@ while ~JoyMainSwitch
     k=k+1;
 end
 stop(myFirstMotor)
+stop(mySecondMotor)
 
 
 
