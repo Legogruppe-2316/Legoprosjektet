@@ -21,6 +21,7 @@ filename = 'PO2_FiltreringData.mat';
 %                      INITIALIZE EQUIPMENT
 
 if online
+
     
     % LEGO EV3 og styrestikke
     mylego = legoev3('USB');
@@ -31,6 +32,7 @@ if online
 
     joystick = vrjoystick(selected_joystick);
     [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
+
 
     % sensorer
     myColorSensor = colorSensor(mylego, 1);
@@ -78,13 +80,9 @@ while ~JoyMainSwitch
             tic
             Tid(1) = 0;
             Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
-            referanseVerdi = Lys(1);
-            e(1) = referanseVerdi - Lys(1);
-            
         else
             Tid(k) = toc;
             Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
-            e(k) = referanseVerdi - Lys(k);
         end
        
         % Bruk filen joytest.m til å finne koden for de andre 
@@ -135,10 +133,23 @@ while ~JoyMainSwitch
 
 
     if k==1
+        referanseVerdi = Lys(1);
+        e(1) = referanseVerdi - Lys(1);
         Ts(1) = nominalTimeStep;
-
+        IAE(1) = 0;
+        TV_a(1) = 0;
+        TV_b(1) = 0;
     else
         Ts(k) = Tid(k) - Tid(k-1);
+
+        e(k) = referanseVerdi - Lys(k);
+        IAE(k) = EulerForward(IAE(k-1), abs(e(k-1)), Ts(k));
+
+        TV_a(k) = TV_a(k-1) + abs(powerA(k) - powerA(k - 1));
+        TV_b(k) = TV_b(k-1) + abs(powerD(k)- powerD(k -1));
+
+
+
     end
     %--------------------------------------------------------------
 
@@ -178,11 +189,22 @@ while ~JoyMainSwitch
     title('Avvik e(k)');
 
     subplot(3,2,3);
-    title('PowerA(k) og PowerD(k)');
+    title('PowerA(k), blaa og PowerD(k), roed');
     plot(Tid(1:k), powerA(1:k), 'b');
     hold on;
     plot(Tid(1:k), powerD(1:k), 'r');
-   
+
+    subplot(3,2,4);
+    plot(Tid(1:k), IAE(1:k));   
+    title('IAE(k)');
+
+    subplot(3,2,5);
+    plot(Tid(1:k), TV_a(1:k), 'r');
+    hold on;
+    plot(Tid(1:k), TV_b(1:k), 'b');
+
+    title('TV_A(k), roed, TV_B(k), blaa')
+
     
     
 
