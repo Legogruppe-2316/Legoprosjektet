@@ -13,7 +13,7 @@
 %                EXPERIMENT SETUP AND DATA FILENAME
 clear; close all
 online = false;
-filename = 'kjoringThomas.mat';
+filename = 'kjoringGard.mat';
 %--------------------------------------------------------------------------
 
 
@@ -22,7 +22,6 @@ filename = 'kjoringThomas.mat';
 
 if online
 
-    
     % LEGO EV3 og styrestikke
     mylego = legoev3('USB');
     selected_joystick = 1;
