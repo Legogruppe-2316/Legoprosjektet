@@ -118,10 +118,10 @@ while ~JoyMainSwitch
             MAE(1) = 0;
 
             % Constants
-            Ki = 0;
-            Kp = 2;
-            Kd = 0;
-            u_initial = 20;
+            Ki = 1.5;
+            Kp = 1.7;
+            Kd = 0.8;
+            u_initial = 15;
 
             P(1) = 0;
             I(1) = 0;
@@ -165,11 +165,11 @@ while ~JoyMainSwitch
 
     subplot(3,1,2);
     plot(Tid(1:k), I(1:k),'b');
-    title('Proporsjonalvirkning P(k)')
+    title('Integralvirkning I(k)')
 
     subplot(3,1,3);
     plot(Tid(1:k), D(1:k),'b');
-    title('Proporsjonalvirkning P(k)')
+    title('Derivatvirkning D(k)')
 
     % tegn nå (viktig kommando)
     drawnow
