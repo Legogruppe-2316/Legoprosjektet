@@ -119,7 +119,7 @@ while ~JoyMainSwitch
 
             % Constants
             Ki = 0;
-            Kp = 2;
+            Kp = 2.5;
             Kd = 0;
             u_initial = 20;
 
