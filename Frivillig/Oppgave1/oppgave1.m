@@ -12,8 +12,8 @@
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                EXPERIMENT SETUP AND DATA FILENAME
 clear; close all
-online = true;
-filename = 'automatiskKjoring2.mat';
+online = false;
+filename = 'automatiskKjoring3.mat';
 %--------------------------------------------------------------------------
 
 
@@ -116,12 +116,14 @@ while ~JoyMainSwitch
             %  Verdier for Ki, kp og kd
             % Lader + full lysstyrke uten grafer:
             % Ki = 1, Kp = 2.0, Kd = 0.8, u_initial = 15
+            % Uten lader + uten grafer
+            % Ki = 1, Kp = 2.0, Kd = 0.75, u_initial = 30
 
             % Constants
             Ki = 1;
-            Kp = 2.0;
-            Kd = 0.8;
-            u_initial = 15;
+            Kp = 2.3;
+            Kd = 0.6;
+            u_initial = 40;
 
             P(1) = 0;
             I(1) = 0;
@@ -194,7 +196,7 @@ while ~JoyMainSwitch
     %                  PLOT DATA
 
     % aktiver fig1
-   %{
+   
     figure(fig1)
     
     subplot(3,3,1);
@@ -241,7 +243,7 @@ while ~JoyMainSwitch
 
     % tegn nå (viktig kommando)
     drawnow
-   %}
+   
 
     %--------------------------------------------------------------
     % Oppdaterer tellevariabel
