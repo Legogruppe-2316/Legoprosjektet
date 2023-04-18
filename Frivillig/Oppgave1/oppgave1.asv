@@ -115,13 +115,13 @@ while ~JoyMainSwitch
 
             %  Verdier for Ki, kp og kd
             % Lader + full lysstyrke uten grafer:
-            % Ki = 1, Kp = 2.6, Kd = 1.1, u_initial = 15
+            % Ki = 1, Kp = 2.0, Kd = 1.1, u_initial = 15
 
             % Constants
-            Ki = 4;
-            Kp = 2.7;
-            Kd = 0;
-            u_initial = 30;
+            Ki = 1;
+            Kp = 2.0;
+            Kd = 1.1;
+            u_initial = 15;
 
             P(1) = 0;
             I(1) = 0;
@@ -134,9 +134,20 @@ while ~JoyMainSwitch
 
             % PID regulator
             P(k) = Kp * e(k);
-            I(k) = EulerForward(I(k-1), Ki * e(k-1), Ts(k));
             e_f(k) = IIR_filter(e_f(k-1),e(k), alfaIIR);
             D(k) = Kd * Derivation(e_f(k-1), e_f(k), Ts(k));
+
+            currentValue = EulerForward(I(k-1), Ki * e(k-1), Ts(k));
+            if (currentValue > 100)
+                I(k) = I(k-1);
+
+            elseif (currentValue < -100)
+                I(k) = I(k-1);
+            
+            else
+                I(k) = currentValue;
+            end
+
             u(k) = u_initial + P(k) + I(k) + D(k);
     end
 
@@ -183,9 +194,9 @@ while ~JoyMainSwitch
     %                  PLOT DATA
 
     % aktiver fig1
-    
+   %{ 
     figure(fig1)
-    %{
+    
     subplot(3,3,1);
     plot(Tid(1:k), P(1:k),'b');
     title('Proporsjonalvirkning P(k)')
@@ -222,7 +233,7 @@ while ~JoyMainSwitch
 
     % tegn nå (viktig kommando)
     drawnow
-    %}
+    %
 
     %--------------------------------------------------------------
     % Oppdaterer tellevariabel
