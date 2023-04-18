@@ -13,7 +13,7 @@
 %                EXPERIMENT SETUP AND DATA FILENAME
 clear; close all
 online = true;
-filename = 'kjoringGard.mat';
+filename = 'automatiskKjoring1.mat';
 %--------------------------------------------------------------------------
 
 
@@ -112,16 +112,16 @@ while ~JoyMainSwitch
             referanseVerdi = Lys(1);
             e(1) = referanseVerdi - Lys(1);
             Ts(1) = nominalTimeStep;
-            IAE(1) = 0;
-            TV_a(1) = 0;
-            TV_b(1) = 0;
-            MAE(1) = 0;
+
+            %  Verdier for Ki, kp og kd
+            % Lader + full lysstyrke uten grafer:
+            % Ki = 1, Kp = 2.6, Kd = 1.1, u_initial = 15
 
             % Constants
-            Ki = 1.5;
-            Kp = 1.7;
-            Kd = 0.8;
-            u_initial = 15;
+            Ki = 4;
+            Kp = 2.4;
+            Kd = 0.5;
+            u_initial = 30;
 
             P(1) = 0;
             I(1) = 0;
@@ -132,16 +132,15 @@ while ~JoyMainSwitch
             Ts(k) = Tid(k) - Tid(k-1);
             e(k) = referanseVerdi - Lys(k);
 
-              % PID regulator
-              P(k) = Kp * e(k);
-              I(k) = EulerForward(I(k-1), Ki * e(k-1), Ts(k));
-              e_f(k) = IIR_filter(e_f(k-1),e(k), alfaIIR);
-              D(k) = Kd * Derivation(e_f(k-1), e_f(k), Ts(k));
-
-              u(k) = u_initial + P(k) + I(k) + D(k);
+            % PID regulator
+            P(k) = Kp * e(k);
+            I(k) = EulerForward(I(k-1), Ki * e(k-1), Ts(k));
+            e_f(k) = IIR_filter(e_f(k-1),e(k), alfaIIR);
+            D(k) = Kd * Derivation(e_f(k-1), e_f(k), Ts(k));
+            u(k) = u_initial + P(k) + I(k) + D(k);
     end
-    if online
-         
+
+    if online     
         kraftA = u_initial - u(k);
         kraftD = u_initial + u(k);
     
@@ -150,6 +149,33 @@ while ~JoyMainSwitch
     
         myFirstMotor.Speed= powerA(k);
         mySecondMotor.Speed= powerD(k); 
+
+        if k==1
+            IAE(1) = 0;
+            TV_a(1) = 0;
+            TV_b(1) = 0;
+            MAE(1) = 0; 
+        else
+            IAE(k) = EulerForward(IAE(k-1), abs(e(k-1)), Ts(k));
+            MAE(k) =   MAE(k-1) + (1/k) * abs(e(k));
+            TV_a(k) = TV_a(k-1) + abs(powerA(k) - powerA(k - 1));
+            TV_b(k) = TV_b(k-1) + abs(powerD(k)- powerD(k -1)); 
+        end
+    end
+
+    % Offline modus
+    if ~online
+        if k==1
+            IAE(1) = 0;
+            TV_a(1) = 0;
+            TV_b(1) = 0;
+            MAE(1) = 0; 
+        else
+            IAE(k) = EulerForward(IAE(k-1), abs(e(k-1)), Ts(k));
+            MAE(k) =   MAE(k-1) + (1/k) * abs(e(k));
+            TV_a(k) = TV_a(k-1) + abs(powerA(k) - powerA(k - 1));
+            TV_b(k) = TV_b(k-1) + abs(powerD(k)- powerD(k -1)); 
+        end
     end
     %--------------------------------------------------------------
 
@@ -157,22 +183,46 @@ while ~JoyMainSwitch
     %                  PLOT DATA
 
     % aktiver fig1
-    figure(fig1)
-
-    subplot(3,1,1);
+    
+    %figure(fig1)
+    %{
+    subplot(3,3,1);
     plot(Tid(1:k), P(1:k),'b');
     title('Proporsjonalvirkning P(k)')
 
-    subplot(3,1,2);
+    subplot(3,3,2);
     plot(Tid(1:k), I(1:k),'b');
     title('Integralvirkning I(k)')
 
-    subplot(3,1,3);
+    subplot(3,3,3);
     plot(Tid(1:k), D(1:k),'b');
     title('Derivatvirkning D(k)')
 
+    subplot(3,3,4);
+    plot(Tid(1:k), MAE(1:k));
+    title('MAE(k)');
+
+    subplot(3,3,5);
+    plot(Tid(1:k), IAE(1:k));
+    title('IAE(k)');
+
+    subplot(3,3,6);
+    plot(Tid(1:k), TV_a(1:k), 'b');
+    hold on;
+    plot(Tid(1:k), TV_b(1:k), 'r');
+    title('TV_a(k) og TV_b(k)');
+    legend('TV_a(k)', 'TV_b(k)');
+
+    subplot(3,3,7);
+    plot(Tid(1:k), powerA(1:k), 'b');
+    hold on;
+    plot(Tid(1:k), powerD(1:k), 'r');
+    title('powerA(k) og powerD(k)');
+    legend('powerA(k)', 'powerB(k)');
+
     % tegn nå (viktig kommando)
     drawnow
+    %}
 
     %--------------------------------------------------------------
     % Oppdaterer tellevariabel
