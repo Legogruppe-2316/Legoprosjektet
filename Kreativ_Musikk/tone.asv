@@ -1,0 +1,25 @@
+function tone = mapGrayScaleToTone(grayScaleValue)
+    load("tonedata.mat")
+    if (grayScaleValue <= 5)
+        tone = ToneData(1);
+        return;
+    elseif (grayScaleValue <= 9)
+        tone = ToneData(2);
+        return;
+    elseif (grayScaleValue <= 12)
+        tone = ToneData(3);
+        return;
+    elseif (grayScaleValue <= 22)
+        tone = ToneData(4);
+        return;
+    elseif (grayScaleValue <= 28)
+        tone = ToneData(5);
+        return;
+    elseif (grayScaleValue <= 30)
+        tone = ToneData(6);
+        return;
+    end
+    greyScaleValue = grayScaleValue/33;
+    index = round(greyScaleValue * (length(ToneData) - 1)) + 1;
+    tone = ToneData(index);
+end

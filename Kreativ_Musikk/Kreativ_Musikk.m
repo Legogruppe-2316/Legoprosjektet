@@ -13,7 +13,7 @@
 %                EXPERIMENT SETUP AND DATA FILENAME
 clear; close all
 online = true;
-filename = 'kjoringGard.mat';
+filename = 'kjoringChristopher.mat';
 %--------------------------------------------------------------------------
 
 
@@ -22,6 +22,7 @@ filename = 'kjoringGard.mat';
 
 if online
 
+    
     % LEGO EV3 og styrestikke
     mylego = legoev3('USB');
     selected_joystick = 1;
@@ -30,13 +31,16 @@ if online
     end
 
     joystick = vrjoystick(selected_joystick);
-    [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
 
 
     % sensorer
     myColorSensor = colorSensor(mylego, 1);
     myFirstMotor = motor(mylego,'A');
     mySecondMotor = motor(mylego, 'D');
+
+
+
+
 else
     % Dersom online=false lastes datafil.
     load(filename)
@@ -67,6 +71,7 @@ k=1;
 %                        INITAL VALUES 
 alfaIIR = 0.03;
 powerScale = 0.2;
+
 intialIIRSpeed = 0;
 nominalTimeStep = 0;
 referanseVerdi = 0;
@@ -75,15 +80,6 @@ while ~JoyMainSwitch
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                       GET TIME AND MEASUREMENT
     if online
-        if k==1
-            tic
-            Tid(1) = 0;
-            Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
-        else
-            Tid(k) = toc;
-            Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
-        end
-       
         % Bruk filen joytest.m til å finne koden for de andre 
         % knappene og aksene.
         [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
@@ -93,6 +89,17 @@ while ~JoyMainSwitch
         JoyPowerScale(k) = JoyAxes(4);
         start(myFirstMotor)
         start(mySecondMotor)
+
+        if k==1
+            tic
+            Tid(1) = 0;
+            Lys(1) = double(readLightIntensity(myColorSensor,'reflected'));
+        else
+            Tid(k) = toc;
+            Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+        end
+       
+
 
     else
         if k==numel(Tid)
@@ -110,11 +117,18 @@ while ~JoyMainSwitch
 
     % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %             CONDITIONS, CALCULATIONS AND SET MOTOR POWER
+    toneFrequency(k) = tone(Lys(k));
 
-    if (Lys(k) >= 60)
-        break;
+
+    if (Lys(k) < 30)
+        playTone(mylego, toneFrequency(k), 1, 100)
+    else
+        playTone(mylego, 10000, 1, 0)
+
     end
-    
+
+
+
     if online
 
         powerScale = (JoyPowerScale(k) + 100) / 200;
@@ -131,35 +145,17 @@ while ~JoyMainSwitch
     
         myFirstMotor.Speed= powerA(k);
         mySecondMotor.Speed= powerD(k);
-        
-        
-    
-    
-    
-        if k==1
-            referanseVerdi = Lys(1);
-            e(1) = referanseVerdi - Lys(1);
-            Ts(1) = nominalTimeStep;
-            IAE(1) = 0;
-            TV_a(1) = 0;
-            TV_b(1) = 0;
-            MAE(1) = 0;
-        else
-            Ts(k) = Tid(k) - Tid(k-1);
-    
-            e(k) = referanseVerdi - Lys(k);
-            IAE(k) = EulerForward(IAE(k-1), abs(e(k-1)), Ts(k));
-            
-            MAE(k) =   MAE(k-1) + (1/k) * abs(e(k));
-    
-            TV_a(k) = TV_a(k-1) + abs(powerA(k) - powerA(k - 1));
-            TV_b(k) = TV_b(k-1) + abs(powerD(k)- powerD(k -1));
-    
-    
-    
-        end
-
     end
+
+    subplot(2,1, 1)
+    plot(Tid(1:k),toneFrequency(1:k), 'b');
+    title('Avstand(t) og filtrert avstand')
+    hold on;
+    plot(Tid(1:k), Lys(1:k), 'r')
+
+
+
+
     %--------------------------------------------------------------
 
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -169,61 +165,8 @@ while ~JoyMainSwitch
     figure(fig1)
 
 
-    %subplot(1,3, 1)
-    %plot(Tid(1:k),JoyTwist(1:k), 'b');
-    %title('Joy Forover(t)')
-    %xlabel('Tid [sek]')
 
-    %subplot(1,3,2);
-    %plot(Tid(1:k),Lys(1:k),'r');
-    %title('Verdier for Lys(k)');
-    %xlabel('Tid(s)');
 
-    %subplot(1,3,3);
-    %plot(Tid(1:k),e(1:k),'g');
-    %title('Verdier for e(k)');
-    %xlabel('Tid(s)');
-
-    % Kommenterer ut plotter
-    %gjør referanseverdi til en vektor
-    %referansevektor = repmat(referanseVerdi,1,length(Lys));
-    %subplot(3,2,1);
-    %plot(Tid(1:k),Lys(1:k), 'r');
-    %title('Referanse og Lys(k)');
-    %hold on;
-    %plot(Tid(1:k),referansevektor, 'b');
-
-    
-    %subplot(3,2,2);
-    %plot(Tid(1:k), e(1:k),'g');
-    %title('Avvik e(k)');
-
-    %subplot(3,2,3);
-    %title('PowerA(k) og PowerD(k) ');
-    %plot(Tid(1:k), powerA(1:k), 'b');
-    %hold on;
-    %plot(Tid(1:k), powerD(1:k), 'r');
-    %legend('PowerA', 'PowerD')
-
-    %subplot(3,2,4);
-    %plot(Tid(1:k), IAE(1:k));   
-    %title('IAE(k)');
-
-    %subplot(3,2,5);
-    %plot(Tid(1:k), TV_a(1:k), 'r');
-    %hold on;
-    %plot(Tid(1:k), TV_b(1:k), 'b');
-    %title('TVa(k) og TVb(k)');
-    %legend('TVa', 'TVb');
-    
-
-    %subplot(3,2,6);
-    %plot(Tid(1:k), MAE(1:k),'m');
-    %title('MAE(k)');
-    
-    antallMalinger = repmat(k,1,length(Lys));
-    hist(Lys)
-    title('some title');
    
     
 
